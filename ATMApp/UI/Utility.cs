@@ -1,13 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace ATMApp.UI;
 
 public static class Utility
 {
+
+    private static readonly CultureInfo culture;
+    private static long tranId;
+    static Utility()
+    {
+        culture = new CultureInfo("ar-EG").Clone() as CultureInfo;
+        culture.NumberFormat.CurrencySymbol = "EGP";
+        culture.NumberFormat.CurrencyDecimalSeparator = ".";
+        culture.NumberFormat.CurrencyGroupSeparator = ",";
+    }
+
+    public static long getTransactionId()
+    {
+        return ++tranId;
+    }
+
     public static string GetSecretInput(string prompt)
     {
         bool isPrompt = true;
@@ -87,4 +105,9 @@ public static class Utility
         Console.ReadLine();
 
     }
+    public static string FormatAmount(decimal amt)
+    {
+        return amt.ToString("C2", culture);
+    }
+
 }

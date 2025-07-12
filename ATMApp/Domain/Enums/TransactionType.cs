@@ -4,9 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ATMApp
+namespace ATMApp.Domain.Enums;
+public enum TransactionType
 {
-    interface _
-    {
-    }
+        Deposite,
+        Withdrawal,
+        Transfer
+
 }

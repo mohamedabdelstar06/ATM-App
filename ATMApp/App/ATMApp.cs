@@ -1,16 +1,28 @@
 ﻿using ATMApp.Domain.Entities;
+using ATMApp.Domain.Enums;
 using ATMApp.Domain.Interfaces;
 using ATMApp.UI;
 
 namespace ATMApp
 {
-    public class ATMApp : IUserLogin
+    public class ATMApp : IUserLogin , IUserAccountAction ,ITransaction
     {
+        
+        private List<UserAccount> userAccountList;
+        private UserAccount ? selectedAccount;
+        private List<Transaction> _listOfTransaction;
+        private const decimal minimumKeptAmount = 500;
 
-        private static List<UserAccount> userAccountList;
-        private static UserAccount selectedAccount;
 
-
+        public void Run()
+        {
+            AppScreen.Welcome();
+            InitializedData();
+            CheckUserCardNumberAndPasswword();
+            AppScreen.WelcomeCustomer(selectedAccount.FullName);
+            AppScreen.DisplayAppMenu();
+            ProcessMenuOption();
+        }
 
         public void InitializedData()
         {
@@ -20,6 +32,7 @@ namespace ATMApp
             new UserAccount{Id =2, FullName="Israa", AccountNumber=456789, CardNumber=654654, CardPin=456456, AccountBalance=40000.00m, IsLocked=false},
             new UserAccount{Id =3, FullName="Amira", AccountNumber=123555, CardNumber=987987, CardPin=789789, AccountBalance=30000.00m, IsLocked=true}
         };
+            _listOfTransaction = new List<Transaction>();
         }
         public void CheckUserCardNumberAndPasswword()
         {
@@ -61,12 +74,160 @@ namespace ATMApp
                     Console.Clear();
                 }
             }
-
         }
-        public void Welcome()
+        private void ProcessMenuOption()
         {
-            Console.WriteLine($"Welcome Back, {selectedAccount.FullName}");
+            switch (Validator.Convert<int>("An option : "))
+            {
+                case (int)AppMenu.CheckBalance:
+                    CheckBalance();
+                    break;
+                case (int)AppMenu.PlaceDeposit:
+                    PlaceDeposit();
+                    break;
+                case (int)AppMenu.MakeWidthDrawal:
+                    MakeWidthDrawal();
+                    break;
+                case (int)AppMenu.ViewTransaction:
+                    Console.WriteLine("Viewing Transaction.... ");
+                    break;
+                case (int)AppMenu.Logout:
+                    AppScreen.LogoutProgress();
+                    Utility.PrintMessage("You have successfully logged out. Please collect"+
+                        "your ATM card"); 
+                    break;
+                default:
+                    Utility.PrintMessage("Invalid option ",false);
+                    break;
+            }
         }
 
+        public void CheckBalance()
+        {
+            Utility.PrintMessage($"Your Account Palance is {Utility.FormatAmount(selectedAccount.AccountBalance)}");   
+        }
+
+        public void PlaceDeposit()
+        {
+            Console.WriteLine("\nOnly multiples of 500 and 1000 EGP allowed. \n");
+            var transaction_amt = Validator.Convert<int>($"amount{AppScreen.cur}");
+
+            // simulate counting
+            Console.WriteLine("\nChecking and Counting Bank notes.");
+            Utility.PrintDotAnimation();
+            Console.WriteLine("");
+
+            //Some gaurd clause
+            if(transaction_amt <=0)
+            {
+                Utility.PrintMessage("Amount needs to be greater than Zero. Try Again",false);
+                return;
+            }
+
+            if (transaction_amt % 500 != 0)
+            {
+                Utility.PrintMessage($"Enter deposit amount in multipes of 500 0r 1000. Try again" , false);
+                return;
+            }
+
+            if(PreviewBankNotesCount(transaction_amt)== false)
+            {
+                Utility.PrintMessage($"You have cancelled your action." , false);
+                return;
+            }
+            //bind transaction details to transaction object
+            InsertTransaction(selectedAccount.Id, TransactionType.Deposite, transaction_amt, "");
+            // Update account balance 
+            selectedAccount.AccountBalance += transaction_amt;
+            //print success message
+            Utility.PrintMessage($"Your deposit of {Utility.FormatAmount(transaction_amt)} was +" +
+                $"successful",true);
+        }
+
+        public void MakeWidthDrawal()
+        {
+            var transaction_amt = 0;
+            int selectedAmount = AppScreen.SelectAmount();
+            if(selectedAmount == -1)
+            {
+                selectedAmount = AppScreen.SelectAmount();
+
+            }else if (selectedAmount!=0)
+            {
+                transaction_amt = selectedAmount;
+            }
+            else
+            {
+                transaction_amt = Validator.Convert<int>($"amount {AppScreen.cur}");
+
+            }
+
+            //input validation 
+            if (transaction_amt <=0)
+            {
+                Utility.PrintMessage("Amount needs to be greater than zero. Try again", false);
+                return ;
+            }
+            if(transaction_amt % 500 != 0)
+            {
+                Utility.PrintMessage("You can only withdraw amount in multiple of 500 or 1000 EGP. Try Again", false);
+                return;
+            }
+            // Business logic validation 
+            if (transaction_amt > selectedAccount.AccountBalance)
+            {
+                Utility.PrintMessage($"Withdrawal failed. Your balance is too low to withdraw"+
+                    $"{Utility.FormatAmount(transaction_amt)}",false);
+                return;
+            }
+            if((selectedAccount.AccountBalance - transaction_amt<minimumKeptAmount))
+            {
+                Utility.PrintMessage($"Withdrawal failed. Your account needs to have "+
+                    $"minimum {Utility.FormatAmount(minimumKeptAmount)}",false);
+                return;
+            }
+            //Bind widthdrawal details to transaction object
+            InsertTransaction(selectedAccount.Id, TransactionType.Withdrawal, transaction_amt, "");
+            //Update account balance 
+            selectedAccount.AccountBalance -= transaction_amt;
+            // Success message 
+            Utility.PrintMessage("You have successfully withdrawn" + $"{Utility.FormatAmount(transaction_amt)}.", true);
+
+        }
+        private bool PreviewBankNotesCount(int amount)
+        {
+            int thousandNotesCount = amount / 1000;
+            int fiveHundredNotes = (amount % 1000) / 500;
+            Console.WriteLine("\nSummary");
+            Console.WriteLine("-------");
+            Console.WriteLine($"{AppScreen.cur} 1000 X {thousandNotesCount} = {1000 * thousandNotesCount  }");
+            Console.WriteLine($"{AppScreen.cur} 500 X {fiveHundredNotes} = {500 * fiveHundredNotes} ");
+            Console.WriteLine($"Total amount : {Utility.FormatAmount(amount)}\n\n");
+            int opt = Validator.Convert<int>(" 1 to confirm");
+            return opt.Equals(1);
+        }
+
+        public void InsertTransaction(long _userBankAccountId, TransactionType _transactionType, decimal _transactionAmount, string _desc)
+        {
+            //create a new transaction object
+            var transaction = new Transaction()
+            {
+                TransactionId = Utility.getTransactionId(),
+                UserBankAccountId  = _userBankAccountId,
+                TransactionDate =DateTime.Now,
+                TransactionType = _transactionType,
+                TransactionAmount = _transactionAmount,
+                Description = _desc
+            };
+            // Add Transaction object to the list
+            _listOfTransaction.Add(transaction);
+        }
+
+        public void ViewTransaction()
+        {
+            throw new NotImplementedException();
+        }
     }
+
+
 }

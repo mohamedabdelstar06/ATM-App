@@ -9,17 +9,10 @@ namespace ATMApp.App;
 internal class Entry
 {
     static void Main(string[] args)
-    {
-
-        AppScreen.Welcome();
-
+    { 
         ATMApp atmApp = new ATMApp();
-
         atmApp.InitializedData();
-        atmApp.CheckUserCardNumberAndPasswword();
-        atmApp.Welcome();
-
-        Utility.PressEnterToContinue();
-
+        atmApp.Run();
+        
     }
 }
