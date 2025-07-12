@@ -49,38 +49,3 @@ cd ATM-App
 
 # Open in Visual Studio and run
 
-🎥 Project Idea & Inspiration
-In this project, I practiced and applied key OOP concepts, including:
-
-Creating the Visual Studio project and structuring it properly
-
-Designing classes, interfaces, and enums to keep code organized
-
-Writing the ATM logic: login, transactions, deposits, withdrawals, transfers
-
-Handling validation, error messages, and user experience in the console
-
-The idea comes from a two-part tutorial:
-
-Part 1: Welcome screen, login system, validating card number & PIN
-
-Part 2: Displaying menu, processing transactions, checking balance, deposits, withdrawals, transfers, and logout
-
-📂 Project Structure (screenshot above)
-The project is organized into clear folders:
-
-Domain – Entities, Enums, Interfaces
-
-UI – Console screens & user interactions
-
-ATMApp.cs – Main application logic
-
-💡 Why this project?
-Strengthened my understanding of Object-Oriented Programming
-
-Practiced designing a real, interactive console application
-
-Learned to keep code clean, reusable, and easy to extend
-
-📎 License
-This project is for educational purposes. Feel free to explore, clone, and learn from it! 🚀
