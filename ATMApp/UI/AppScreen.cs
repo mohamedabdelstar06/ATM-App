@@ -98,7 +98,8 @@ public  class AppScreen
             case 0: return 0;
             default:
                 Utility.PrintMessage("Invalid Input. Try again.", false);
-                return SelectAmount();
+                return -1;
+                break;
         }
     }
     internal InternalTransfer InternalTransferForm()

@@ -2,6 +2,7 @@
 using ATMApp.Domain.Enums;
 using ATMApp.Domain.Interfaces;
 using ATMApp.UI;
+using ConsoleTables;
 
 namespace ATMApp
 {
@@ -26,6 +27,11 @@ namespace ATMApp
             InitializedData();
             CheckUserCardNumberAndPasswword();
             AppScreen.WelcomeCustomer(selectedAccount.FullName);
+            while (true)
+            {
+                AppScreen.DisplayAppMenu();
+                ProcessMenuOption();
+            }
             AppScreen.DisplayAppMenu();
             ProcessMenuOption();
         }
@@ -99,7 +105,7 @@ namespace ATMApp
                     ProcessInternalTransfer(internalTransfer);
                     break;
                 case (int)AppMenu.ViewTransaction:
-                    Console.WriteLine("Viewing Transaction.... ");
+                    ViewTransaction();
                     break;
                 case (int)AppMenu.Logout:
                     AppScreen.LogoutProgress();
@@ -169,7 +175,9 @@ namespace ATMApp
             int selectedAmount = AppScreen.SelectAmount();
             if(selectedAmount == -1)
             {
-                selectedAmount = AppScreen.SelectAmount();
+                MakeWidthDrawal();
+                return;
+
 
             }else if (selectedAmount!=0)
             {
@@ -244,7 +252,23 @@ namespace ATMApp
 
         public void ViewTransaction()
         {
-            throw new NotImplementedException();
+            var filteredTransactionList = _listOfTransaction.Where(t => t.UserBankAccountId == selectedAccount.Id).ToList();
+            //check if there is a transaction
+            if (filteredTransactionList.Count <= 0)
+            {
+                Utility.PrintMessage($"You have No transaction yet.",true);
+            }
+            else
+            {
+                var table = new ConsoleTable("Id", "Transaction Date", "Type", "Description","Amount "+ AppScreen.cur);
+                foreach(var tran in filteredTransactionList)
+                {
+                    table.AddRow(tran.TransactionId,tran.TransactionDate,tran.TransactionType,tran.Description,tran.TransactionAmount);
+                }
+                table.Options.EnableCount = false;
+                table.Write();
+                Utility.PrintMessage($"You have {filteredTransactionList.Count} transaction(s)", true);
+            }
         }
 
         private void ProcessInternalTransfer(InternalTransfer internalTransfer)
@@ -261,7 +285,7 @@ namespace ATMApp
                 return;
             }
             //check the minimum kept amount 
-            if ((selectedAccount.AccountBalance - minimumKeptAmount) < minimumKeptAmount)
+            if ((selectedAccount.AccountBalance - internalTransfer.TransferAmount) < minimumKeptAmount)
             {
                 Utility.PrintMessage($"Transfer fail. Your account needs to have minimum " +
                     $"{Utility.FormatAmount(minimumKeptAmount)}", false);
@@ -300,9 +324,10 @@ namespace ATMApp
             selectedBankAccountReciever.AccountBalance += internalTransfer.TransferAmount;
 
             //Print success message
-            Utility.PrintMessage($"You have successfully transfer" +
+            Utility.PrintMessage($"You have successfully transfer " +
                 $"{Utility.FormatAmount(internalTransfer.TransferAmount)} to " +
                 $"{internalTransfer.ReciepeintBankAccountName}", true);
+
         }
     }
 }
