@@ -46,6 +46,7 @@ Clone the project and run it locally:
 ```bash
 git clone https://github.com/mohamedabdelstar06/ATM-App.git
 cd ATM-App
+
 # Open in Visual Studio and run
 
 ## 🎥 **Project Idea & Inspiration**
