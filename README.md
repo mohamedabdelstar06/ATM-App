@@ -49,39 +49,38 @@ cd ATM-App
 
 # Open in Visual Studio and run
 
-## 🎥 **Project Idea & Inspiration**
+🎥 Project Idea & Inspiration
+In this project, I practiced and applied key OOP concepts, including:
 
-In this project, I practiced and applied key **OOP concepts**, including:
+Creating the Visual Studio project and structuring it properly
 
-- **Designing classes, interfaces, enums** to keep code organized & maintainable
-- **Writing ATM logic:** login, deposits, withdrawals, transfers, logout
-- **Handling validation, user experience, and clear error messages**
+Designing classes, interfaces, and enums to keep code organized
 
-The idea comes from a **two-part tutorial**:
-- **Part 1:** Welcome screen, login system, validating card number & PIN
-- **Part 2:** Displaying the menu, processing deposits, withdrawals, transfers, viewing transactions & logout
+Writing the ATM logic: login, transactions, deposits, withdrawals, transfers
 
----
+Handling validation, error messages, and user experience in the console
 
-## 📂 **Project Structure** *(shown in screenshot)*
+The idea comes from a two-part tutorial:
 
-The project is divided into clean folders:
+Part 1: Welcome screen, login system, validating card number & PIN
 
-- `Domain` – **Entities, Enums, Interfaces**
-- `UI` – **Screens & user interaction**
-- `ATMApp.cs` – **Core application logic**
+Part 2: Displaying menu, processing transactions, checking balance, deposits, withdrawals, transfers, and logout
 
----
+📂 Project Structure (screenshot above)
+The project is organized into clear folders:
 
-## 💡 **Why I built this**
+Domain – Entities, Enums, Interfaces
 
-- To **solidify my OOP knowledge** by building something real
-- **Practice clean code & modular structure**
-- **Learn to handle real user scenarios** in a console app
+UI – Console screens & user interactions
 
----
+ATMApp.cs – Main application logic
 
-## 📎 **License**
+💡 Why this project?
+Strengthened my understanding of Object-Oriented Programming
 
-This project is for **educational purposes**. Feel free to explore, clone, and learn! 🚀
+Practiced designing a real, interactive console application
 
+Learned to keep code clean, reusable, and easy to extend
+
+📎 License
+This project is for educational purposes. Feel free to explore, clone, and learn from it! 🚀
