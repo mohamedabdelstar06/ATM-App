@@ -12,6 +12,12 @@ namespace ATMApp
         private UserAccount ? selectedAccount;
         private List<Transaction> _listOfTransaction;
         private const decimal minimumKeptAmount = 500;
+        private readonly AppScreen screen;
+
+        public ATMApp()
+        {
+            screen =new AppScreen();
+        }
 
 
         public void Run()
@@ -88,6 +94,10 @@ namespace ATMApp
                 case (int)AppMenu.MakeWidthDrawal:
                     MakeWidthDrawal();
                     break;
+                case (int)AppMenu.InternalTransfer:
+                    var internalTransfer = screen.InternalTransferForm();
+                    ProcessInternalTransfer(internalTransfer);
+                    break;
                 case (int)AppMenu.ViewTransaction:
                     Console.WriteLine("Viewing Transaction.... ");
                     break;
@@ -110,38 +120,47 @@ namespace ATMApp
         public void PlaceDeposit()
         {
             Console.WriteLine("\nOnly multiples of 500 and 1000 EGP allowed. \n");
-            var transaction_amt = Validator.Convert<int>($"amount{AppScreen.cur}");
+
+            int transaction_amt = 0;
+
+            while (true)
+            {
+                transaction_amt = Validator.Convert<int>($"amount {AppScreen.cur}");
+
+                if (transaction_amt <= 0)
+                {
+                    Utility.PrintMessage("Amount needs to be greater than Zero. Try Again", false);
+                    continue;
+                }
+
+                if (transaction_amt % 500 != 0)
+                {
+                    Utility.PrintMessage("Enter deposit amount in multiples of 500 or 1000. Try again", false);
+                    continue;
+                }
+
+                break; // الرقم صحيح، نخرج من الـ loop
+            }
 
             // simulate counting
             Console.WriteLine("\nChecking and Counting Bank notes.");
             Utility.PrintDotAnimation();
             Console.WriteLine("");
 
-            //Some gaurd clause
-            if(transaction_amt <=0)
+            if (PreviewBankNotesCount(transaction_amt) == false)
             {
-                Utility.PrintMessage("Amount needs to be greater than Zero. Try Again",false);
+                Utility.PrintMessage($"You have cancelled your action.", false);
                 return;
             }
 
-            if (transaction_amt % 500 != 0)
-            {
-                Utility.PrintMessage($"Enter deposit amount in multipes of 500 0r 1000. Try again" , false);
-                return;
-            }
-
-            if(PreviewBankNotesCount(transaction_amt)== false)
-            {
-                Utility.PrintMessage($"You have cancelled your action." , false);
-                return;
-            }
-            //bind transaction details to transaction object
+            // bind transaction details to transaction object
             InsertTransaction(selectedAccount.Id, TransactionType.Deposite, transaction_amt, "");
+
             // Update account balance 
             selectedAccount.AccountBalance += transaction_amt;
-            //print success message
-            Utility.PrintMessage($"Your deposit of {Utility.FormatAmount(transaction_amt)} was +" +
-                $"successful",true);
+
+            // print success message
+            Utility.PrintMessage($"Your deposit of {Utility.FormatAmount(transaction_amt)} was successful", true);
         }
 
         public void MakeWidthDrawal()
@@ -227,7 +246,66 @@ namespace ATMApp
         {
             throw new NotImplementedException();
         }
+
+        private void ProcessInternalTransfer(InternalTransfer internalTransfer)
+        {
+            if (internalTransfer.TransferAmount <= 0)
+            {
+                Utility.PrintMessage("Amount needs to be more than zero. Try again.", false);
+                return;
+            }
+            if (internalTransfer.TransferAmount > selectedAccount.AccountBalance)
+            {
+                Utility.PrintMessage($"Transfer failed. You do not have enough balance" +
+                    $"to transfer {Utility.FormatAmount(internalTransfer.TransferAmount)}", false);
+                return;
+            }
+            //check the minimum kept amount 
+            if ((selectedAccount.AccountBalance - minimumKeptAmount) < minimumKeptAmount)
+            {
+                Utility.PrintMessage($"Transfer fail. Your account needs to have minimum " +
+                    $"{Utility.FormatAmount(minimumKeptAmount)}", false);
+                return;
+            }
+            //Check reciever account number is valid 
+            var selectedBankAccountReciever = (
+                from userAcc in userAccountList
+                where userAcc.AccountNumber ==internalTransfer.ReciepeintBankAccountNumber
+                select userAcc).FirstOrDefault();
+
+            if (selectedBankAccountReciever == null)
+            {
+                Utility.PrintMessage("Transfer failed . Recieber bank account number is invalid.", false);
+                return;
+            }
+
+            //Check reciever account name is valid 
+            if (selectedBankAccountReciever.FullName != internalTransfer.ReciepeintBankAccountName)
+            {
+                Utility.PrintMessage("Transfer Failed. Recipient bank account name is not match", false);
+                return;
+            }
+            //add transaction to transaction record sender 
+            InsertTransaction(selectedAccount.Id, TransactionType.Transfer, -internalTransfer.TransferAmount, $"Transfered" +
+                $"to {selectedBankAccountReciever.AccountNumber} ({selectedBankAccountReciever.FullName})");
+
+            //Update sender account balance 
+            selectedAccount.AccountBalance -= internalTransfer.TransferAmount;
+
+            //Add transaction record reciever
+            InsertTransaction(selectedBankAccountReciever.Id, TransactionType.Transfer, internalTransfer.TransferAmount, $"Transfered from" +
+                    $"{selectedAccount.AccountNumber}({selectedAccount.FullName})");
+
+            //Update reciever account balance
+            selectedBankAccountReciever.AccountBalance += internalTransfer.TransferAmount;
+
+            //Print success message
+            Utility.PrintMessage($"You have successfully transfer" +
+                $"{Utility.FormatAmount(internalTransfer.TransferAmount)} to " +
+                $"{internalTransfer.ReciepeintBankAccountName}", true);
+        }
     }
-
-
 }
+
+
+

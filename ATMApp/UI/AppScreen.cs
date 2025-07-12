@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace ATMApp.UI;
-public static class AppScreen
+public  class AppScreen
 {
     internal const string cur = " EGP ";
     internal static void Welcome()
@@ -33,7 +33,7 @@ public static class AppScreen
 
         tempUserAccount.CardNumber =Validator.Convert<long>("your card number .");
         tempUserAccount.CardPin = Convert.ToInt32(Utility.GetSecretInput("Enter your Card PIN"));
-        return tempUserAccount;
+        return tempUserAccount; 
     }
     internal static void LoginProgress()
     {
@@ -84,41 +84,7 @@ public static class AppScreen
         Console.WriteLine("");
 
         int selectedAccount = Validator.Convert<int>("option:");
-        //switch (selectedAccount)
-        //{
-        //    case 1:
-        //        return 500;
-        //        break;
-        //    case 2:
-        //        return 1000;
-        //        break;
-        //    case 3:
-        //        return 2000;
-        //        break;
-        //    case 4:
-        //        return 5000;
-        //        break;
-        //    case 5:
-        //        return 10000;
-        //        break;
-        //    case 6:
-        //        return 15000;
-        //        break;
-        //    case 7:
-        //        return 20000;
-        //        break;
-        //    case 8:
-        //        return 40000;
-        //        break;
-        //    case 0:
-        //        return 0;
-        //        break;
-        //    default :
-        //        Utility.PrintMessage("Invalid Input. Try again.",false);
-        //        selectedAmount();
-        //        return -1;
-        //        break;
-        //}
+        
         switch (selectedAccount)
         {
             case 1: return 500;
@@ -134,6 +100,14 @@ public static class AppScreen
                 Utility.PrintMessage("Invalid Input. Try again.", false);
                 return SelectAmount();
         }
+    }
+    internal InternalTransfer InternalTransferForm()
+    {
+        var internalTransfer = new InternalTransfer();
+        internalTransfer.ReciepeintBankAccountNumber = Validator.Convert<long>("recipient account number");
+        internalTransfer.TransferAmount = Validator.Convert<decimal>($"amount {cur}");
+        internalTransfer.ReciepeintBankAccountName = Utility.GetUserInput("recipient name");
+        return internalTransfer;
     }
 
 }
